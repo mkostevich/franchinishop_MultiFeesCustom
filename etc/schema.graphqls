@@ -1,0 +1,10 @@
+# Copyright © MageWorx, Inc. All rights reserved.
+# See https://www.mageworx.com/terms-and-conditions for license details.
+
+interface ProductInterface {
+    mw_product_all_fees: [MwFee] @doc(description: "Product Fees") @resolver(class: "MageWorx\\MultiFeesCustom\\Model\\Resolver\\Product\\AllFees")
+}
+
+type MwFee {
+    min_amount: Money
+}

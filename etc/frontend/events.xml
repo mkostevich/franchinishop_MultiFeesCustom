@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © MageWorx. All rights reserved.
+ * See https://www.mageworx.com/terms-and-conditions for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="checkout_cart_product_add_after">
+        <observer name="mageworx_multifeescustom_register_quote_item" instance="MageWorx\MultiFeesCustom\Observer\RegisterQuoteItemObserver"/>
+    </event>
+    <event name="checkout_cart_add_product_complete">
+        <observer name="mageworx_multifeescustom_add_product_fees" instance="MageWorx\MultiFeesCustom\Observer\AddProductFeesObserver"/>
+    </event>
+</config>

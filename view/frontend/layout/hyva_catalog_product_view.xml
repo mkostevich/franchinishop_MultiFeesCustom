@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © MageWorx. All rights reserved.
+ * See https://www.mageworx.com/terms-and-conditions for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <remove src="MageWorx_MultiFees::css/style.css"/>
+    </head>
+    <body>
+        <referenceBlock name="catalog.product.list.mageworx.multifees.productfee" remove="true"/>
+        <block name="catalog.product.list.mageworx.multifees.productfee.additional" template="MageWorx_MultiFeesCustom::catalog/product/fee.phtml">
+            <block name="mageworx.multifees.product.fees.template_hidden" template="MageWorx_MultiFeesCustom::catalog/product/fees-templates/hidden.phtml"/>
+            <block name="mageworx.multifees.product.fees.template_checkbox" template="MageWorx_MultiFeesCustom::catalog/product/fees-templates/checkbox.phtml"/>
+            <block name="mageworx.multifees.product.fees.template_radio" template="MageWorx_MultiFeesCustom::catalog/product/fees-templates/radio.phtml"/>
+            <block name="mageworx.multifees.product.fees.template_drop_down" template="MageWorx_MultiFeesCustom::catalog/product/fees-templates/drop_down.phtml"/>
+        </block>
+        <referenceContainer name="product.info.additional">
+            <block name="hyva.mageworx.fee.components_constructor" template="Hyva_MageWorxMultiFees::cart/common/fee_components_creator.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

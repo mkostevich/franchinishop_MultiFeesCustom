@@ -68,6 +68,11 @@ class AllFees extends \MageWorx\MultiFeesGraphQl\Model\Resolver\Product\ProductH
         $data               = parent::getPreparedFeeData($fee);
         $data['min_amount'] = $fee->getMinAmount() ? $this->getMinAmountData((float)$fee->getMinAmount()) : null;
 
+        $data['is_enabled_customer_message'] = (bool)$fee->getEnableCustomerMessage();
+        $data['customer_message_title']      = $fee->getCustomerMessageTitle();
+        $data['is_enabled_date_field']       = (bool)$fee->getEnableDateField();
+        $data['date_field_title']            = $fee->getDateFieldTitle();
+
         return $data;
     }
 

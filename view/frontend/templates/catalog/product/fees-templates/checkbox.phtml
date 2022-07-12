@@ -1,0 +1,68 @@
+<?php
+declare(strict_types=1);
+/**
+ * Copyright © MageWorx. All rights reserved.
+ * See https://www.mageworx.com/terms-and-conditions for license details.
+ */
+
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\Escaper;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+?>
+
+<template x-if="fee.input_type === 'checkbox'">
+    <div class="border-2 p-4 mt-4">
+        <div class="mb-4 font-semibold">
+            <span x-text="fee.title"></span>
+            <span class="text-red-400" x-show="fee.is_required">*</span>
+        </div>
+        <div class="mb-4" x-show="fee.description.length > 0">
+            <p x-text="fee.description"></p>
+        </div>
+        <fieldset :id="fee.id">
+            <template x-for="option in fee.options" :key="fee.id">
+                <div class="flex gap-x-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" :value="option.id" x-model="fee.checkedOptions"
+                               form="product_addtocart_form" :name="'fee[' + fee.id + '][options][]'"
+                               @click.prevent="fee.setOption(option.id)" :name="fee.id"/>
+                        <span class="ml-2" x-text="option.field_label"></span>
+                    </label>
+                </div>
+            </template>
+        </fieldset>
+        <template x-if="fee.is_enabled_customer_message">
+            <div class="mt-4">
+                <label x-text="fee.customer_message_title"></label>
+                <template x-if="fee.customer_message_title.length === 0">
+                    <div>
+                        <?= /* @escapeNotVerified */ __('Message for'); ?> "<span x-text="fee.title"></span>"
+                    </div>
+                </template>
+                <textarea class="w-full" x-model="fee.customerMessage"
+                          form="product_addtocart_form" :name="'fee[' + fee.id + '][message]'"
+                          @change="onChangeOption()"></textarea>
+            </div>
+        </template>
+        <template x-if="fee.is_enabled_date_field">
+            <div class="mt-4">
+                <label x-text="fee.date_field_title"></label>
+                <template x-if="fee.date_field_title.length === 0">
+                    <div>
+                        <?= /* @escapeNotVerified */ __('Date for'); ?> "<span x-text="fee.title"></span>"
+                    </div>
+                </template>
+                <input x-model="fee.dateField" type="date"
+                       form="product_addtocart_form" :name="'fee[' + fee.id + '][date]'"
+                       @change="fee.convertDate()"/>
+            </div>
+        </template>
+        <template x-if="fee.checkedOptions.length === 0 && fee.is_required">
+            <div class="mt-4">
+                <span class="text-red-500"><?= __('This fee is required.'); ?></span>
+            </div>
+        </template>
+    </div>
+</template>

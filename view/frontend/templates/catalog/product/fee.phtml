@@ -1,0 +1,205 @@
+<?php
+declare(strict_types=1);
+/**
+ * Copyright © MageWorx. All rights reserved.
+ * See LICENSE.txt for license details.
+ */
+?>
+<?php
+use Magento\Framework\Escaper;
+use Hyva\Theme\ViewModel\ProductPage;
+use Magento\Catalog\Model\Product;
+
+
+/** @var ProductPage $productViewModel */
+/** @var ViewModelRegistry $viewModels */
+/** @var Product $product */
+/** @var Escaper $escaper */
+/** @var $block \MageWorx\MultiFees\Block\Catalog\Product\Fee */
+
+$productViewModel = $viewModels->require(ProductPage::class);
+$product = $productViewModel->getProduct();
+?>
+
+<script>
+    function initMultiFeesForm() {
+        const $addToCart = document.getElementById('product-addtocart-button');
+        const $form = document.getElementById('product_addtocart_form');
+
+        return {
+            init() {
+                $addToCart.addEventListener('click', e => {
+                    if (!this.checkValidate()) {
+                        e.preventDefault();
+                        dispatchMessages([{
+                            type: 'error',
+                            text: "<?= /* @escapeNotVerified */ __('You should fill in required fee fields.'); ?>"
+                        }], 5000)
+                    }
+                })
+
+                const {is_display_title, title} = window.mageworxProductFeeInfo;
+                this.isDisplayTitle = is_display_title;
+                this.title = title;
+
+                this.fetchQuery(
+                    this.getFeesQuery(),
+                    (data) => {
+                        const fees = data.data.products.items[0].mw_product_all_fees;
+                        fees.forEach(fee => {
+                            if (fee.input_type === 'hidden') {
+                                const newFee = {};
+
+                                newFee.description = fee.description;
+                                newFee.id = fee.id;
+                                newFee.input_type = fee.input_type;
+                                newFee.is_required = fee.is_required;
+                                newFee.title = fee.title;
+                                newFee.option = fee.options.findLast(opt => opt.is_default === true);
+
+                                this.feeComponents.push(newFee);
+                            }
+                        });
+
+                        this.feeComponents = [...this.feeComponents, ...window.mwFeeComponentsCreator(this, fees, null)];
+
+                        if (this.feeComponents.length > 0) {
+                            this.feeComponents.forEach(fee => {
+                                if (fee.input_type === 'checkbox') {
+                                    const defaultOptions = [];
+
+                                    fee.options.forEach(option => {
+                                        if (option.is_default) {
+                                            defaultOptions.push(option.id);
+                                        }
+                                    })
+
+                                    fee.checkedOptions = defaultOptions;
+                                }
+                                else if (fee.input_type === 'drop_down' || fee.input_type === 'radio') {
+                                    const defaultOption = fee.options.find(option => {
+                                        return option.is_default === true;
+                                    });
+
+                                    const defaultOptionId = defaultOption.id;
+
+                                    fee.checkedOption = defaultOptionId;
+                                }
+                            })
+                        }
+                    }
+                );
+            },
+            getFeesQuery() {
+                const sku = "<?= $escaper->escapeHtml($product->getSku()) ?>";
+                return `{
+                  products(filter: { sku: { eq: "${sku}" } }) {
+                    items {
+                      mw_product_all_fees {
+                        id
+                        title
+                        description
+                        input_type
+                        is_required
+                        is_enabled_customer_message
+                        customer_message_title
+                        is_enabled_date_field
+                        date_field_title
+                        sort_order
+                        options {
+                          id
+                          field_label
+                          is_default
+                          position
+                          title
+                          price_type
+                          price
+                        }
+                      }
+                    }
+                  }
+                }`
+            },
+            fetchQuery(query, successFunc) {
+                this.startLoading();
+                fetch(BASE_URL + "graphql", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json;charset=utf-8",
+                    },
+                    body: JSON.stringify({ query }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        successFunc(data);
+                        return data;
+                    })
+                    .catch(error => {
+                        dispatchMessages([{
+                            type: 'error',
+                            text: "<?= /* @escapeNotVerified */ __('Something went wrong, please try again later.') ?>"
+                        }], 5000)
+                        this.stopLoading();
+                    })
+                    .finally(() => {
+                        this.stopLoading();
+                    });
+            },
+            startLoading() {
+                this.isLoading = true;
+            },
+            stopLoading() {
+                this.isLoading = false;
+            },
+            checkValidate() {
+                let isValide = true;
+
+                this.feeComponents.forEach(fee => {
+                    if (fee.is_required) {
+                        if (fee.input_type === 'drop_down' || fee.input_type === 'radio') {
+                            if (+fee.checkedOption === -1) {
+                                isValide = false;
+                            }
+                        }
+                        if (fee.input_type === 'checkbox') {
+                            if (fee.checkedOptions.length === 0) {
+                                isValide = false;
+                            }
+                        }
+                    }
+                })
+
+                return isValide;
+            },
+            isLoading: true,
+            feeComponents: [],
+        }
+    }
+</script>
+
+<div x-data="initMultiFeesForm()" x-init="init()">
+    <h3 class="mb-4 mt-4 text-xl font-medium text-gray-900 title-font" x-text="title"
+        x-show="(isLoading || feeComponents.length > 0) && isDisplayTitle"></h3>
+    <template x-if="isLoading">
+        <svg class="w-8 h-8 mr-2 mt-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+        </svg>
+    </template>
+    <template x-if="!isLoading">
+        <div x-show="feeComponents.length > 0">
+            <fieldset name="fee" form="product_addtocart_form">
+                <template x-for="fee in feeComponents">
+                    <div>
+                        <?= $block->getChildHtml('mageworx.multifees.product.fees.template_hidden') ?>
+                        <?= $block->getChildHtml('mageworx.multifees.product.fees.template_checkbox') ?>
+                        <?= $block->getChildHtml('mageworx.multifees.product.fees.template_radio') ?>
+                        <?= $block->getChildHtml('mageworx.multifees.product.fees.template_drop_down') ?>
+                    </div>
+                </template>
+            </fieldset>
+        </div>
+    </template>
+</div>
+
+

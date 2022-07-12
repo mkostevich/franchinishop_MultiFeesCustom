@@ -24,7 +24,7 @@ use Magento\Framework\Escaper;
         </div>
         <select class="w-full" x-model="fee.checkedOption"
                 form="product_addtocart_form" :name="'fee[' + fee.id + '][options][]'"
-                @change="onChangeOption()" :required="fee.is_required" pattern="[0-9]+">
+                @change="onChangeOption()">
             <template x-for="option in fee.options" :key="option.id">
                 <option :value="option.id" x-text="option.field_label"
                         :selected="option.id === fee.checkedOption"></option>

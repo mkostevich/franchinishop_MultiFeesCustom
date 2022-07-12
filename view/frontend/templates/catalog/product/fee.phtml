@@ -8,8 +8,6 @@ declare(strict_types=1);
 <?php
 use Magento\Framework\Escaper;
 use Hyva\Theme\ViewModel\ProductPage;
-use Hyva\Theme\ViewModel\ProductPrice;
-use Magento\Catalog\Pricing\Price\FinalPrice;
 use Magento\Catalog\Model\Product;
 
 
@@ -21,30 +19,33 @@ use Magento\Catalog\Model\Product;
 
 $productViewModel = $viewModels->require(ProductPage::class);
 $product = $productViewModel->getProduct();
-
-/** @var ProductPrice $productPriceViewModel */
-$productPriceViewModel = $viewModels->require(ProductPrice::class);
-$finalPrice = $productPriceViewModel->getPriceValue(FinalPrice::PRICE_CODE, $product);
 ?>
 
 <script>
     function initMultiFeesForm() {
+        const $addToCart = document.getElementById('product-addtocart-button');
+        const $form = document.getElementById('product_addtocart_form');
 
         return {
             init() {
+                $addToCart.addEventListener('click', e => {
+                    if (!this.checkValidate()) {
+                        e.preventDefault();
+                        dispatchMessages([{
+                            type: 'error',
+                            text: "<?= /* @escapeNotVerified */ __('You should fill in required fee fields.'); ?>"
+                        }], 5000)
+                    }
+                })
+
                 const {is_display_title, title} = window.mageworxProductFeeInfo;
                 this.isDisplayTitle = is_display_title;
                 this.title = title;
-                this.productPrice = <?= $finalPrice; ?>;
 
                 this.fetchQuery(
                     this.getFeesQuery(),
                     (data) => {
                         const fees = data.data.products.items[0].mw_product_all_fees;
-                        console.log('fees');
-                        console.log(fees);
-                        this.feeComponents = window.mwFeeComponentsCreator(this, fees, null);
-
                         fees.forEach(fee => {
                             if (fee.input_type === 'hidden') {
                                 const newFee = {};
@@ -55,14 +56,12 @@ $finalPrice = $productPriceViewModel->getPriceValue(FinalPrice::PRICE_CODE, $pro
                                 newFee.is_required = fee.is_required;
                                 newFee.title = fee.title;
                                 newFee.option = fee.options.findLast(opt => opt.is_default === true);
-                                debugger;
 
                                 this.feeComponents.push(newFee);
                             }
                         });
 
-                        console.log('feecomponents');
-                        console.log(this.feeComponents);
+                        this.feeComponents = [...this.feeComponents, ...window.mwFeeComponentsCreator(this, fees, null)];
 
                         if (this.feeComponents.length > 0) {
                             this.feeComponents.forEach(fee => {
@@ -87,9 +86,6 @@ $finalPrice = $productPriceViewModel->getPriceValue(FinalPrice::PRICE_CODE, $pro
                                     fee.checkedOption = defaultOptionId;
                                 }
                             })
-
-                            this.calculateFeesSum();
-                            this.changeProductPrice();
                         }
                     }
                 );
@@ -149,88 +145,41 @@ $finalPrice = $productPriceViewModel->getPriceValue(FinalPrice::PRICE_CODE, $pro
                         this.stopLoading();
                     });
             },
-            onChangeOption() {
-                this.calculateFeesSum();
-            },
             startLoading() {
                 this.isLoading = true;
             },
             stopLoading() {
                 this.isLoading = false;
             },
-            calculateFeesSum() {
-                this.feesSummary = 0;
+            checkValidate() {
+                let isValide = true;
 
                 this.feeComponents.forEach(fee => {
-                    if (fee.input_type === 'checkbox') {
-                        const checked = fee.checkedOptions;
-
-                        checked.forEach(optionId => {
-                            const checkedFee = fee.options.find(option => {
-                                return option.id === optionId;
-                            })
-
-                            if (checkedFee) {
-                                this.feesSummary += checkedFee.price;
+                    if (fee.is_required) {
+                        if (fee.input_type === 'drop_down' || fee.input_type === 'radio') {
+                            if (+fee.checkedOption === -1) {
+                                isValide = false;
                             }
-                        })
-                    }
-                    else if (fee.input_type === 'drop_down' || fee.input_type === 'radio') {
-                        debugger;
-                        let checked = fee.checkedOption;
-                        const checkedFee = fee.options.find(option => option.id === +checked);
-
-                        if (+checked !== -1 && checkedFee) {
-                            debugger;
-                            this.feesSummary += checkedFee.price;
-                            debugger;
                         }
-                        debugger;
+                        if (fee.input_type === 'checkbox') {
+                            if (fee.checkedOptions.length === 0) {
+                                isValide = false;
+                            }
+                        }
                     }
                 })
 
-                this.changeProductPrice();
+                return isValide;
             },
-            changeProductPrice() {
-                /*
-                const finalPrice = this.feesSummary + this.productPrice;
-                debugger;
-                console.log(hyva.formatPrice(finalPrice));
-                const $price = document.querySelector('.price-box.price-final_price');
-                const $priceDiv = $price.parentElement;
-                debugger;
-                $price.classList.add('hidden');
-                if (document.getElementById('mw-fees-price')) {
-                    const $newPrice = document.getElementById('mw-fees-price');
-                    $newPrice.innerText = `${hyva.formatPrice(finalPrice)}`;
-                }
-                else {
-                    const $newPriceDiv = document.createElement("div");
-                    const $newPrice = document.createElement("span");
-                    $newPriceDiv.appendChild($newPrice);
-                    $newPrice.classList.add('title-font', 'font-medium', 'text-2xl', 'text-gray-900');
-                    $newPrice.setAttribute("id", "mw-fees-price");
-                    $newPrice.innerText = `${hyva.formatPrice(finalPrice)}`;
-                    $priceDiv.appendChild($newPriceDiv);
-                }
-                 */
-            },
-            onChangedProductPrice($event) {
-                if (this.feeComponents.length > 0) {
-                    this.productPrice = $event.detail;
-                    this.changeProductPrice();
-                }
-            },
-            feesSummary: 0,
-            productPrice: 0,
             isLoading: true,
             feeComponents: [],
         }
     }
 </script>
 
-<div x-data="initMultiFeesForm()" x-init="init()" @update-product-final-price.window="onChangedProductPrice($event)">
-    <h3 class="mb-4 mt-4 text-xl font-medium text-gray-900 title-font" x-show="isLoading || feeComponents.length > 0" x-text="title"></h3>
+<div x-data="initMultiFeesForm()" x-init="init()">
+    <h3 class="mb-4 mt-4 text-xl font-medium text-gray-900 title-font" x-text="title"
+        x-show="(isLoading || feeComponents.length > 0) && isDisplayTitle"></h3>
     <template x-if="isLoading">
         <svg class="w-8 h-8 mr-2 mt-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>

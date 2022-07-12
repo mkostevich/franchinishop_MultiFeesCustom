@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © MageWorx. All rights reserved.
+ * See LICENSE.txt for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="MageWorx\MultiFees\Block\Cart\ProductFeeData" name="mageworx_product_fee_data" after="-" cacheable="false" template="MageWorx_MultiFees::info/product_fee_data.phtml"/>
+        </referenceContainer>
+        <referenceBlock name="checkout.root">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="checkout" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="sidebar" xsi:type="array">
+                                    <item name="children" xsi:type="array">
+                                        <item name="summary" xsi:type="array">
+                                            <item name="children" xsi:type="array">
+                                                <item name="cart_items" xsi:type="array">
+                                                    <item name="children" xsi:type="array">
+                                                        <item name="mw-multifeescustom-product-fee-containers" xsi:type="array">
+                                                            <item name="component" xsi:type="string">MageWorx_MultiFeesCustom/js/view/summary/item/product-fees</item>
+                                                            <item name="children" xsi:type="array">
+                                                                <item name="mageworx-product-fee-form-container" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">MageWorx_MultiFees/js/view/mageworx-product-fee-form</item>
+                                                                    <item name="provider" xsi:type="string">checkoutProvider</item>
+                                                                    <item name="config" xsi:type="array">
+                                                                        <item name="template" xsi:type="string">MageWorx_MultiFees/mageworx-product-fee-form</item>
+                                                                    </item>
+                                                                    <item name="children" xsi:type="array">
+                                                                        <item name="mageworx-fee-form-fieldset" xsi:type="array">
+                                                                            <item name="component" xsi:type="string">uiComponent</item>
+                                                                            <item name="displayArea" xsi:type="string">mageworx-fee-form-fields</item>
+                                                                            <item name="children" xsi:type="array">
+                                                                                <!-- Wee add fields in LayoutProccessor class -->
+                                                                            </item>
+                                                                        </item>
+                                                                    </item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                </item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+    </body>
+</page>

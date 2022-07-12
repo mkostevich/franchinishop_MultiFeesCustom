@@ -38,7 +38,7 @@ use Magento\Framework\Escaper;
                 <label x-text="fee.customer_message_title"></label>
                 <template x-if="fee.customer_message_title.length === 0">
                     <div>
-                        <?= /* @escapeNotVerified */ __('Message for'); ?> "<span x-text="fee.title"></span>"
+                        <?= /* @noEscape */ __('Message for'); ?> "<span x-text="fee.title"></span>"
                     </div>
                 </template>
                 <textarea class="w-full" x-model="fee.customerMessage"
@@ -51,7 +51,7 @@ use Magento\Framework\Escaper;
                 <label x-text="fee.date_field_title"></label>
                 <template x-if="fee.date_field_title.length === 0">
                     <div>
-                        <?= /* @escapeNotVerified */ __('Date for'); ?> "<span x-text="fee.title"></span>"
+                        <?= /* @noEscape */ __('Date for'); ?> "<span x-text="fee.title"></span>"
                     </div>
                 </template>
                 <input x-model="fee.dateField" type="date"

@@ -10,7 +10,7 @@ namespace MageWorx\MultiFeesCustom\Model;
 
 use MageWorx\MultiFees\Model\ResourceModel\Fee\AbstractCollection;
 
-abstract class AbstractFeeManager extends \MageWorx\MultiFees\Model\AbstractFeeManager
+class QuoteFeeManager extends \MageWorx\MultiFees\Model\QuoteFeeManager
 {
     /**
      * @param AbstractCollection $feeCollection

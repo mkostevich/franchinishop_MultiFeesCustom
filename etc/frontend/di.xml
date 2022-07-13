@@ -7,8 +7,6 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="MageWorx\MultiFees\Model\AbstractFeeManager" type="MageWorx\MultiFeesCustom\Model\AbstractFeeManager"/>
-
     <preference for="MageWorx\MultiFees\Block\FeeFormInput\Checkbox" type="MageWorx\MultiFeesCustom\Block\FeeFormInput\Checkbox"/>
     <preference for="MageWorx\MultiFees\Block\FeeFormInput\DropDown" type="MageWorx\MultiFeesCustom\Block\FeeFormInput\DropDown"/>
     <preference for="MageWorx\MultiFees\Block\FeeFormInput\Radio" type="MageWorx\MultiFeesCustom\Block\FeeFormInput\Radio"/>

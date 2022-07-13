@@ -11,9 +11,6 @@
     <preference for="MageWorx\MultiFees\Block\FeeFormInput\DropDown" type="MageWorx\MultiFeesCustom\Block\FeeFormInput\DropDown"/>
     <preference for="MageWorx\MultiFees\Block\FeeFormInput\Radio" type="MageWorx\MultiFeesCustom\Block\FeeFormInput\Radio"/>
 
-    <type name="Magento\Checkout\Model\DefaultConfigProvider">
-        <plugin name="add_mw_product_fees_to_checkout_config" type="MageWorx\MultiFeesCustom\Plugin\AddProductFeesToCheckoutConfigPlugin"/>
-    </type>
     <type name="Magento\Checkout\Block\Onepage">
         <arguments>
             <argument name="layoutProcessors" xsi:type="array">

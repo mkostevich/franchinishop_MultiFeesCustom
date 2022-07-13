@@ -10,10 +10,11 @@ namespace MageWorx\MultiFeesCustom\Plugin;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Escaper;
-use Magento\Checkout\Model\DefaultConfigProvider;
+use Magento\Quote\Api\Data\TotalsInterface as QuoteTotalsInterface;
 use MageWorx\MultiFees\Block\Cart\ProductFeeInfo;
+use Magento\Quote\Model\Cart\CartTotalRepository;
 
-class AddProductFeesToCheckoutConfigPlugin
+class AddProductFeesToQuoteTotalsPlugin
 {
     /**
      * @var CheckoutSession
@@ -54,26 +55,26 @@ class AddProductFeesToCheckoutConfigPlugin
     }
 
     /**
-     * @param DefaultConfigProvider $subject
-     * @param array|mixed $result
-     * @return array|mixed
+     * @param CartTotalRepository $subject
+     * @param QuoteTotalsInterface $result
+     * @return QuoteTotalsInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function afterGetConfig(DefaultConfigProvider $subject, $result)
+    public function afterGet(CartTotalRepository $subject, $result): QuoteTotalsInterface
     {
-        if (isset($result['totalsData']['items'])) {
-            foreach ($result['totalsData']['items'] as &$data) {
-                $newOptions = $this->getFormattedOptionValue((int)$data['item_id']);
+        if ($result->getItems() !== null) {
+            foreach ($result->getItems() as $item) {
+                $newOptions = $this->getFormattedOptionValue((int)$item->getItemId());
 
                 if (empty($newOptions)) {
                     continue;
                 }
 
-                $options = $this->helperData->unserializeValue($data['options']);
+                $options = $this->helperData->unserializeValue($item->getOptions());
                 $options = array_merge_recursive($options, $newOptions);
 
-                $data['options'] = $this->helperData->serializeValue($options);
+                $item->setOptions($this->helperData->serializeValue($options));
             }
         }
 
@@ -107,7 +108,13 @@ class AddProductFeesToCheckoutConfigPlugin
     public function getFeeDetailsByItemId(int $itemId): array
     {
         $fees     = [];
-        $fullInfo = $this->checkoutSession->getQuote()->getMageworxProductFeeDetails();
+        $quote    = $this->checkoutSession->getQuote();
+        $fullInfo = $quote->getMageworxProductFeeDetails();
+
+        if (!$fullInfo) {
+            $address = $quote->isVirtual() ? $quote->getBillingAddress() : $quote->getShippingAddress();
+            $fullInfo = $address->getMageworxProductFeeDetails();
+        }
 
         if ($fullInfo) {
             $fullInfo = $this->helperData->unserializeValue($fullInfo);

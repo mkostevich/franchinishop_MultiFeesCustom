@@ -86,12 +86,13 @@ class AllFees extends \MageWorx\MultiFeesGraphQl\Model\Resolver\Product\ProductH
         $options = [];
 
         foreach ($fee->getOptions() as $option) {
+            $title     = $option->getTitle();
             $options[] = [
                 'id'          => (int)$option->getId(),
-                'field_label' => $option->getTitle() . ' - ' . $this->helperPrice->getOptionFormatPrice($option, $fee),
+                'field_label' => __('%1 per %2', $title, $this->helperPrice->getOptionFormatPrice($option, $fee)),
                 'is_default'  => (bool)$option->getIsDefault(),
                 'position'    => (int)$option->getPosition(),
-                'title'       => $option->getTitle(),
+                'title'       => $title,
                 'price_type'  => $option->getPriceType(),
                 'price'       => (float)$option->getPrice()
             ];

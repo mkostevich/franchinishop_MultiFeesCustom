@@ -13,17 +13,18 @@ use Magento\Framework\Escaper;
 ?>
 
 <template x-if="fee.input_type === 'radio'">
-    <div class="mt-4">
-        <template x-for="option in fee.options" :key="fee.id">
-            <div class="flex gap-x-4">
-                <label class="flex items-center">
-                    <input type="radio" :value="option.id"
-                           form="product_addtocart_form" :name="'fee[' + fee.id + '][options][]'"
-                           x-model="fee.checkedOption" @change="onChangeOption()" :name="fee.id"/>
-                    <span class="ml-2" x-text="option.field_label"></span>
-                </label>
-            </div>
-        </template>
+    <div class="mt-8">
+        <fieldset :id="fee.id">
+            <template x-for="option in fee.options" :key="fee.id">
+                <div class="flex gap-x-4">
+                    <label class="flex items-center">
+                        <input type="radio" :value="option.id" x-model="fee.checkedOption"
+                               @change="onChangeOption()" :name="fee.id"/>
+                        <span class="ml-2" x-text="option.field_label"></span>
+                    </label>
+                </div>
+            </template>
+        </fieldset>
         <template x-if="fee.is_enabled_customer_message">
             <div class="mt-4">
                 <label x-text="fee.customer_message_title"></label>
@@ -32,9 +33,7 @@ use Magento\Framework\Escaper;
                         <?= /* @noEscape */ __('Message for'); ?> "<span x-text="fee.title"></span>"
                     </div>
                 </template>
-                <textarea class="w-full" x-model="fee.customerMessage"
-                          form="product_addtocart_form" :name="'fee[' + fee.id + '][message]'"
-                          @change="onChangeOption()"></textarea>
+                <textarea class="w-full" x-model="fee.customerMessage" @change="onChangeOption()"></textarea>
             </div>
         </template>
         <template x-if="fee.is_enabled_date_field">
@@ -45,14 +44,7 @@ use Magento\Framework\Escaper;
                         <?= /* @noEscape */ __('Date for'); ?> "<span x-text="fee.title"></span>"
                     </div>
                 </template>
-                <input x-model="fee.dateField" type="date"
-                       form="product_addtocart_form" :name="'fee[' + fee.id + '][date]'"
-                       @change="fee.convertDate()"/>
-            </div>
-        </template>
-        <template x-if="fee.checkedOption == -1 && fee.is_required">
-            <div class="mt-4">
-                <span class="text-red-500"><?= __('This fee is required.'); ?></span>
+                <input x-model="fee.dateField" type="date" @change="fee.convertDate()"/>
             </div>
         </template>
     </div>

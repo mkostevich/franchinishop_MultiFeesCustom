@@ -1,0 +1,194 @@
+<?php
+declare(strict_types=1);
+/**
+ * Copyright © MageWorx. All rights reserved.
+ * See https://www.mageworx.com/terms-and-conditions for license details.
+ */
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\Escaper;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+
+$uniqueId = uniqid();
+?>
+
+<script>
+    function mwProductFeesCreator_<?= $uniqueId; ?>() {
+        return {
+            beforeInit() {
+              if (window.mwFeesConfig) {
+                  this.init(window.mwFeesConfig);
+              }
+              else {
+                  window.addEventListener("mw-fees-config-loaded", () => this.init(window.mwFeesConfig));
+              }
+            },
+            init(config) {
+                this.isApplyOnClick = config.isApplyOnClick;
+
+                const item = JSON.parse(this.$el.parentElement.dataset.mwFeeItem);
+                const itemApplied = item.mw_applied_product_fees;
+                this.cartId = JSON.parse(this.$el.parentElement.dataset.mwCartId);
+
+                const productFees = JSON.parse(this.$el.parentElement.dataset.mwProductFees);
+                const currentProductFees = productFees?.find(product => product.quote_item_id == item.id);
+                this.productId = currentProductFees?.quote_item_id; // cart item id
+
+                // creating fee components for this product
+                this.feeComponents = window.mwFeeComponentsCreator(this, currentProductFees?.fees, itemApplied);
+            },
+            onChangeOption() {
+              if (this.isApplyOnClick) {
+                  this.applyFees();
+              }
+            },
+            applyFees() {
+                const queryFeeData = [];
+                this.feeComponents.forEach(fee => {
+                    let feeOptions = fee.getOptionsForQuery();
+
+                    let fee_data_elem = `{
+                        fee_id: ${fee.id}
+                        fee_option_ids: [${feeOptions}]
+                        message: "${fee.customerMessage}"
+                        date: "${fee.dateFieldConverted}"
+                    }`
+                    queryFeeData.push(fee_data_elem);
+                });
+
+                this.fetchQuery(
+                    this.getApplyFeeMutation(queryFeeData),
+                    () => {
+                        dispatchMessages([{
+                            type: 'success',
+                            text: "<?= /* @noEscape */ __('Fees were successfully applied.'); ?>"
+                        }], 5000)
+                        this.getCart();
+                    }
+                );
+            },
+            getApplyFeeMutation(feeData) {
+                return `mutation {
+                    addMwProductFeesToCart(
+                        input: {
+                            cart_id: "${this.cartId}"
+                            quote_item_id: ${this.productId}
+                            fee_data: [
+                                ${feeData}
+                            ]
+                        }
+                    ) {
+                        cart {
+                            mw_applied_product_fees {
+                                quote_item_id
+                                fees {
+                                    id
+                                    title
+                                    type
+                                    customer_message
+                                    date
+                                    price {
+                                        value
+                                        currency
+                                    }
+                                    tax {
+                                        value
+                                        currency
+                                    }
+                                    options {
+                                        id
+                                        title
+                                        price {
+                                            value
+                                            currency
+                                        }
+                                        tax {
+                                            value
+                                            currency
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }`
+            },
+            fetchQuery(query, successFunc) {
+                this.startLoading();
+                fetch(BASE_URL + "graphql", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json;charset=utf-8",
+                    },
+                    body: JSON.stringify({ query }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        successFunc(data);
+                        return data;
+                    })
+                    .catch(error => {
+                        dispatchMessages([{
+                            type: 'error',
+                            text: "<?= /* @noEscape */ __('Something went wrong, please try again later.') ?>"
+                        }], 5000)
+                        this.stopLoading();
+                    })
+                    .finally(() => {
+                       this.stopLoading();
+                    });
+            },
+            getCart() {
+                this.$el.dispatchEvent(new CustomEvent('get-cart-mw-fees', { bubbles: true }));
+            },
+            startLoading() {
+                this.isLoading = true;
+            },
+            stopLoading() {
+                this.isLoading = false;
+            },
+            updateData($event) {
+                const cartData = $event.detail.cart;
+                const items = cartData.items;
+                const item = items.find(el => el.id == this.productId);
+
+                // update data in all fees
+                this.feeComponents.forEach(fee => {
+                    fee.setChecked(item.mw_applied_product_fees, false);
+                })
+
+                this.stopLoading();
+            },
+            feeComponents: [],
+            isLoading: false,
+            cartId: "",
+            productId: null,
+            isApplyOnClick: false,
+        }
+    }
+</script>
+
+<template x-if="cartData.mw_product_fees">
+    <div @get-cart-mw-fees="getCart()" :data-mw-fee-item="JSON.stringify(item)"
+         :data-mw-cart-id="JSON.stringify(cartId)" :data-mw-product-fees="JSON.stringify(cartData.mw_product_fees)">
+            <form x-data="mwProductFeesCreator_<?= $uniqueId; ?>()" x-init="beforeInit()" @cart-data-updated.window="updateData" @submit.prevent="applyFees()">
+                <?= $block->getChildHtml('mw-fees-pr-options-loading') ?>
+                <div x-show="feeComponents && feeComponents.length > 0">
+                    <template x-for="fee in feeComponents">
+                        <div>
+                            <?= $block->getChildHtml('mageworx.multifees.cart.fees.template_checkbox') ?>
+                            <?= $block->getChildHtml('mageworx.multifees.cart.fees.template_radio') ?>
+                            <?= $block->getChildHtml('mageworx.multifees.cart.fees.template_drop_down') ?>
+                        </div>
+                    </template>
+                    <template x-if="!isApplyOnClick">
+                        <button class="w-auto btn btn-primary justify-center text-smmr-auto mt-4 mb-4">
+                            <?= /* @noEscape */ __('Apply Fee'); ?>
+                        </button>
+                    </template>
+                </div>
+            </form>
+    </div>
+</template>
+

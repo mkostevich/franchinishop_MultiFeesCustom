@@ -7,4 +7,74 @@
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <referenceBlock name="mageworx.multifees.cart.fees" remove="true"/>
+
+    <referenceBlock name="mageworx.multifees.cart.fees">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/product_options.phtml</argument>
+        </action>
+    </referenceBlock>
+    <referenceBlock name="mageworx.multifees.cart.fees.template_checkbox">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/checkbox.phtml</argument>
+        </action>
+    </referenceBlock>
+    <referenceBlock name="mageworx.multifees.cart.fees.template_radio">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/radio.phtml</argument>
+        </action>
+    </referenceBlock>
+    <referenceBlock name="mageworx.multifees.cart.fees.template_drop_down">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/drop_down.phtml</argument>
+        </action>
+    </referenceBlock>
+
+    <referenceBlock name="mageworx.multifees.cart.quote_cart.template_checkbox">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/checkbox.phtml</argument>
+        </action>
+    </referenceBlock>
+    <referenceBlock name="mageworx.multifees.cart.quote_cart.template_radio">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/radio.phtml</argument>
+        </action>
+    </referenceBlock>
+    <referenceBlock name="mageworx.multifees.cart.quote_cart.template_drop_down">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/drop_down.phtml</argument>
+        </action>
+    </referenceBlock>
+
+    <referenceBlock name="mageworx.multifees.cart.quote_shipping.template_checkbox">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/checkbox.phtml</argument>
+        </action>
+    </referenceBlock>
+    <referenceBlock name="mageworx.multifees.cart.quote_shipping.template_radio">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/radio.phtml</argument>
+        </action>
+    </referenceBlock>
+    <referenceBlock name="mageworx.multifees.cart.quote_shipping.template_drop_down">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/drop_down.phtml</argument>
+        </action>
+    </referenceBlock>
+
+    <referenceBlock name="mageworx.multifees.cart.quote_payment.template_checkbox">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/checkbox.phtml</argument>
+        </action>
+    </referenceBlock>
+    <referenceBlock name="mageworx.multifees.cart.quote_payment.template_radio">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/radio.phtml</argument>
+        </action>
+    </referenceBlock>
+    <referenceBlock name="mageworx.multifees.cart.quote_payment.template_drop_down">
+        <action method="setTemplate">
+            <argument name="template" xsi:type="string">MageWorx_MultiFeesCustom::cart/fees-templates/drop_down.phtml</argument>
+        </action>
+    </referenceBlock>
 </page>

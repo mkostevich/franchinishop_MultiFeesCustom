@@ -112,6 +112,10 @@ class ProductLayoutProcessor extends \MageWorx\MultiFees\Block\LayoutProcessor\P
                 $fieldSetPointer = &$containers[$containerName]['children']['mageworx-fee-form-fieldset']['children'];
 
                 foreach ($productFeeComponents as $component) {
+                    if ($component['component'] === 'MageWorx_MultiFees/js/form/element/product-checkbox-set') {
+                        $component['config']['template']    = 'MageWorx_MultiFeesCustom/form/field';
+                        $component['config']['elementTmpl'] = 'MageWorx_MultiFeesCustom/form/element/checkbox-set';
+                    }
                     $fieldSetPointer[] = $component;
                 }
             }

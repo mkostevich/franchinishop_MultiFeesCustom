@@ -14,6 +14,13 @@ use Magento\Framework\Escaper;
 
 <template x-if="fee.input_type === 'drop_down'">
     <div class="mt-6">
+        <div class="mb-4 font-semibold">
+            <span x-text="fee.title"></span>
+            <span class="text-red-400" x-show="fee.is_required">*</span>
+        </div>
+        <div class="mb-4" x-show="fee.description.lenght > 0">
+            <p x-text="fee.description"></p>
+        </div>
         <select class="w-full" x-model="fee.checkedOption" @change="onChangeOption()">
             <template x-for="option in fee.options" :key="option.id">
                 <option :value="option.id" x-text="option.field_label"

@@ -14,7 +14,7 @@ use Magento\Framework\Escaper;
 
 
 <template x-if="fee.input_type === 'drop_down'">
-    <div class="mt-4">
+    <div class="mt-6">
         <select class="w-full" x-model="fee.checkedOption"
                 form="product_addtocart_form" :name="'fee[' + fee.id + '][options][]'"
                 @change="onChangeOption()">

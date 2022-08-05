@@ -13,6 +13,6 @@
         <observer name="mageworx_multifeescustom_add_product_fees" instance="MageWorx\MultiFeesCustom\Observer\AddProductFeesObserver"/>
     </event>
     <event name="hyva_config_generate_before">
-        <observer name="MageWorx_MultiFeesCustom" instance="MageWorx\MultiFeesCustom\Observer\RegisterModuleForHyvaConfig"/>
+        <observer name="MageWorx_MultiFeesCustom" instance="Hyva\ExampleModule\Observer\RegisterModuleForHyvaConfig"/>
     </event>
 </config>
